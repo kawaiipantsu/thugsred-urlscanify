@@ -1,0 +1,526 @@
+{
+  "categories": [
+    {
+      "id": "domains",
+      "title": "Domains & scan history",
+      "lead": "Choose whether the domain was the final page, the submitted URL, or a contacted resource.",
+      "icon": 61612,
+      "templates": [
+        {
+          "title": "Recent primary-site observations",
+          "query": "page.domain:{domain} AND date:>now-{days}d",
+          "note": "Find recorded visits whose final page belongs to the selected domain or one of its subdomains.",
+          "tip": "Read the scan timestamp before treating a result as current."
+        },
+        {
+          "title": "One exact primary hostname",
+          "query": "page.domain.keyword:\"{domain}\" AND date:>now-{days}d",
+          "note": "Match the complete final hostname, without including its subdomains.",
+          "tip": "Use the regular page.domain field when you want the whole domain tree."
+        },
+        {
+          "title": "Originally submitted domain",
+          "query": "task.domain:{domain} AND date:>now-{days}d",
+          "note": "Find visits that started with the selected domain, even if navigation ended elsewhere.",
+          "tip": "Compare task.url with page.url to understand the destination."
+        },
+        {
+          "title": "Domain contacted anywhere",
+          "query": "domain:{domain} AND date:>now-{days}d",
+          "note": "Find scans that contacted this domain as a page or resource.",
+          "tip": "A resource relationship alone does not identify the operator of a website."
+        },
+        {
+          "title": "Subdomains without the apex",
+          "query": "page.domain:{domain} AND NOT page.domain.keyword:\"{domain}\" AND date:>now-{days}d",
+          "note": "Look below the supplied domain while excluding that exact hostname.",
+          "tip": "Enter an apex such as example.com to explore its observed subdomains."
+        },
+        {
+          "title": "Older primary-site observations",
+          "query": "page.domain:{domain} AND date:<now-{days}d",
+          "note": "Compare observations that predate your chosen lookback boundary.",
+          "tip": "Archive coverage depends on your account and does not prove continuous availability."
+        }
+      ]
+    },
+    {
+      "id": "connections",
+      "title": "Resources & connections",
+      "lead": "Trace what pages contacted and distinguish an embedded resource from the main site.",
+      "icon": 61672,
+      "templates": [
+        {
+          "title": "Other sites contacting the domain",
+          "query": "domain:{domain} AND NOT page.domain:{domain} AND date:>now-{days}d",
+          "note": "Find scans of other primary domains that requested something from the supplied domain.",
+          "tip": "Inspect the request list to identify the exact resource and initiator."
+        },
+        {
+          "title": "Many contacted IP addresses",
+          "query": "page.domain:{domain} AND stats.uniqIPs:>10 AND date:>now-{days}d",
+          "note": "Find observations with more than ten distinct contacted IP addresses.",
+          "tip": "CDNs, advertising and ordinary dependencies can all increase this count.",
+          "global_query": "stats.uniqIPs:>10 AND date:>now-{days}d"
+        },
+        {
+          "title": "Cross-country requests",
+          "query": "page.domain:{domain} AND stats.uniqCountries:>1 AND date:>now-{days}d",
+          "note": "Review pages whose recorded requests reached IPs in multiple geolocated countries.",
+          "tip": "IP geolocation describes hosting observations, not the nationality of an operator.",
+          "global_query": "stats.uniqCountries:>1 AND date:>now-{days}d"
+        },
+        {
+          "title": "Busy request waterfalls",
+          "query": "page.domain:{domain} AND stats.requests:>100 AND date:>now-{days}d",
+          "note": "Find scans with a large number of recorded resource requests.",
+          "tip": "Use the request waterfall to separate first-party code from third-party dependencies.",
+          "global_query": "stats.requests:>100 AND date:>now-{days}d"
+        },
+        {
+          "title": "Domain text in requested URLs",
+          "query": "filename:\"{domain}\" AND date:>now-{days}d",
+          "note": "Look for the domain text in any requested URL, including paths and query strings.",
+          "tip": "This is a text match; domain: is the better field for host relationships."
+        },
+        {
+          "title": "Matching response content",
+          "query": "hash:{hash} AND date:>now-{days}d",
+          "note": "Find observations containing a response with the supplied SHA256.",
+          "tip": "The same library, stylesheet or image can legitimately appear on unrelated websites.",
+          "global_query": "hash:{hash} AND date:>now-{days}d"
+        }
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "title": "Hosts & networks",
+      "lead": "Compare primary hosting with infrastructure contacted during a recorded page visit.",
+      "icon": 62003,
+      "templates": [
+        {
+          "title": "Pages hosted on an IP",
+          "query": "page.ip:{ip} AND date:>now-{days}d",
+          "note": "Find scans whose primary page resolved to the supplied address.",
+          "tip": "Shared hosting and reverse proxies can serve unrelated domains."
+        },
+        {
+          "title": "Any contact with an IP",
+          "query": "ip:{ip} AND date:>now-{days}d",
+          "note": "Find page observations that contacted the address anywhere in the request chain.",
+          "tip": "Open the requests to see whether the address served the page or a dependency."
+        },
+        {
+          "title": "IP used as a secondary endpoint",
+          "query": "ip:{ip} AND NOT page.ip:{ip} AND date:>now-{days}d",
+          "note": "Find scans that contacted the address while the primary page used another IP.",
+          "tip": "This narrows a pivot to secondary connections; it does not establish ownership."
+        },
+        {
+          "title": "Primary hosting in an AS",
+          "query": "page.asn:{asn} AND date:>now-{days}d",
+          "note": "Find primary pages observed in the supplied autonomous system.",
+          "tip": "An AS usually covers infrastructure for many different customers."
+        },
+        {
+          "title": "Connections to an AS",
+          "query": "asn:{asn} AND date:>now-{days}d",
+          "note": "Find any scan with a recorded connection to the supplied autonomous system.",
+          "tip": "Use page.asn when you only want primary hosting."
+        },
+        {
+          "title": "AS used by dependencies",
+          "query": "asn:{asn} AND NOT page.asn:{asn} AND date:>now-{days}d",
+          "note": "Find pages hosted elsewhere that contacted this AS.",
+          "tip": "Inspect resource URLs before drawing conclusions about a relationship."
+        }
+      ]
+    },
+    {
+      "id": "navigation",
+      "title": "Redirects & responses",
+      "lead": "Follow the difference between a submitted address and the final page that the scanner saw.",
+      "icon": 61556,
+      "templates": [
+        {
+          "title": "Submitted domain redirects off-site",
+          "query": "task.domain:{domain} AND page.redirected:\"off-domain\" AND date:>now-{days}d",
+          "note": "Find observations marked as redirecting away to another domain.",
+          "tip": "SSO, domain migrations and URL shorteners are common legitimate causes.",
+          "global_query": "page.redirected:\"off-domain\" AND date:>now-{days}d"
+        },
+        {
+          "title": "Arrivals after off-domain redirects",
+          "query": "page.domain:{domain} AND page.redirected:\"off-domain\" AND date:>now-{days}d",
+          "note": "Find off-domain redirect observations that ended at the selected domain.",
+          "tip": "Inspect the original task.url and the recorded navigation chain.",
+          "global_query": "page.redirected:\"off-domain\" AND date:>now-{days}d"
+        },
+        {
+          "title": "HTTP upgraded to HTTPS",
+          "query": "task.domain:{domain} AND page.redirected:\"https-only\" AND date:>now-{days}d",
+          "note": "Find observations classified as an HTTP-to-HTTPS redirect.",
+          "tip": "The classification describes the stored navigation, not a new check.",
+          "global_query": "page.redirected:\"https-only\" AND date:>now-{days}d"
+        },
+        {
+          "title": "Successful primary responses",
+          "query": "page.domain:{domain} AND page.status:200 AND date:>now-{days}d",
+          "note": "Review observations where the final page returned HTTP 200.",
+          "tip": "A successful status code can still describe an error page rendered by the application.",
+          "global_query": "page.status:200 AND date:>now-{days}d"
+        },
+        {
+          "title": "Missing primary pages",
+          "query": "page.domain:{domain} AND page.status:404 AND date:>now-{days}d",
+          "note": "Find stored visits with an HTTP 404 final response.",
+          "tip": "Use these records to compare old paths and migration behavior.",
+          "global_query": "page.status:404 AND date:>now-{days}d"
+        },
+        {
+          "title": "Server-side error responses",
+          "query": "page.domain:{domain} AND page.status:(500 OR 502 OR 503 OR 504) AND date:>now-{days}d",
+          "note": "Review recorded server and gateway failures.",
+          "tip": "A historical error is not evidence that the service is failing now.",
+          "global_query": "page.status:(500 OR 502 OR 503 OR 504) AND date:>now-{days}d"
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "title": "Titles & file pivots",
+      "lead": "Use visible titles and known content hashes to find related observations.",
+      "icon": 61787,
+      "templates": [
+        {
+          "title": "Phrase in a page title",
+          "query": "page.title:\"{title}\" AND date:>now-{days}d",
+          "note": "Search for a phrase in recorded page titles.",
+          "tip": "Matching titles are useful leads, not proof of a shared owner or malicious activity.",
+          "global_query": "page.title:\"{title}\" AND date:>now-{days}d"
+        },
+        {
+          "title": "Title phrase outside your domain",
+          "query": "page.title:\"{title}\" AND NOT page.domain:{domain} AND date:>now-{days}d",
+          "note": "Find the title phrase on primary domains outside the supplied domain tree.",
+          "tip": "Review the screenshot and destination manually before classifying a lookalike.",
+          "global_query": "page.title:\"{title}\" AND date:>now-{days}d"
+        },
+        {
+          "title": "Exact complete page title",
+          "query": "page.title.keyword:\"{title}\" AND date:>now-{days}d",
+          "note": "Match the complete title field rather than a phrase within a longer title.",
+          "tip": "The search index lowercases text, so case is not an identity signal.",
+          "global_query": "page.title.keyword:\"{title}\" AND date:>now-{days}d"
+        },
+        {
+          "title": "Login-related titles in scope",
+          "query": "page.domain:{domain} AND page.title:(login OR \"sign in\") AND date:>now-{days}d",
+          "note": "Locate observations with common authentication-page words in the title.",
+          "tip": "This is a label-based discovery aid and does not test authentication.",
+          "global_query": "page.title:(login OR \"sign in\") AND date:>now-{days}d"
+        },
+        {
+          "title": "HTML responses in scope",
+          "query": "page.domain:{domain} AND page.mimeType:\"text/html\" AND date:>now-{days}d",
+          "note": "Keep observations whose final response was classified as HTML.",
+          "tip": "MIME metadata is recorded from the scan and may not match the current response.",
+          "global_query": "page.mimeType:\"text/html\" AND date:>now-{days}d"
+        },
+        {
+          "title": "Known downloaded file hash",
+          "query": "files.sha256:{hash} AND date:>now-{days}d",
+          "note": "Look for the supplied SHA256 among files downloaded during scans.",
+          "tip": "Use hash: to search general HTTP response bodies instead.",
+          "global_query": "files.sha256:{hash} AND date:>now-{days}d"
+        }
+      ]
+    },
+    {
+      "id": "observations",
+      "title": "TLS & observation context",
+      "lead": "Read certificate and location fields as facts recorded at the time of a scan.",
+      "icon": 61475,
+      "templates": [
+        {
+          "title": "Recently issued certificates",
+          "query": "page.domain:{domain} AND page.tlsAgeDays:[0 TO 7] AND date:>now-{days}d",
+          "note": "Find scans where the observed certificate was no more than seven days old.",
+          "tip": "This age was measured during the scan, not today.",
+          "global_query": "page.tlsAgeDays:[0 TO 7] AND date:>now-{days}d"
+        },
+        {
+          "title": "Short certificate validity periods",
+          "query": "page.domain:{domain} AND page.tlsValidDays:[1 TO 30] AND date:>now-{days}d",
+          "note": "Find certificates recorded with total validity periods of one to thirty days.",
+          "tip": "tlsValidDays is the full validity duration, not the remaining lifetime.",
+          "global_query": "page.tlsValidDays:[1 TO 30] AND date:>now-{days}d"
+        },
+        {
+          "title": "Certificates starting in the lookback",
+          "query": "page.domain:{domain} AND page.tlsValidFrom:>now-{days}d AND date:>now-{days}d",
+          "note": "Find observed certificates whose validity start falls in the chosen period.",
+          "tip": "Compare the scan time and certificate dates when reviewing renewal behavior.",
+          "global_query": "page.tlsValidFrom:>now-{days}d AND date:>now-{days}d"
+        },
+        {
+          "title": "Primary hosting observed in Denmark",
+          "query": "page.domain:{domain} AND page.country:DK AND date:>now-{days}d",
+          "note": "Find scans with a primary hosting IP geolocated to Denmark.",
+          "tip": "A location filter does not identify where the website operator lives.",
+          "global_query": "page.country:DK AND date:>now-{days}d"
+        },
+        {
+          "title": "Any Danish infrastructure contact",
+          "query": "page.domain:{domain} AND country:DK AND date:>now-{days}d",
+          "note": "Find scoped scans that contacted any IP geolocated to Denmark.",
+          "tip": "Use page.country to restrict the primary host rather than all requests.",
+          "global_query": "country:DK AND date:>now-{days}d"
+        },
+        {
+          "title": "Large recorded response sets",
+          "query": "page.domain:{domain} AND stats.dataLength:>10000000 AND date:>now-{days}d",
+          "note": "Find observations with more than ten million bytes of recorded subresource data.",
+          "tip": "Large pages, media and application bundles can all explain this size.",
+          "global_query": "stats.dataLength:>10000000 AND date:>now-{days}d"
+        }
+      ]
+    }
+  ],
+  "operators": [
+    {
+      "operator": "page.domain:",
+      "description": "Final page host and its domain tree.",
+      "example": "page.domain:example.com",
+      "note": "Includes subdomains."
+    },
+    {
+      "operator": "page.domain.keyword:",
+      "description": "One complete final hostname.",
+      "example": "page.domain.keyword:\"example.com\"",
+      "note": "Use this for an exact hostname."
+    },
+    {
+      "operator": "task.domain:",
+      "description": "Host in the URL originally submitted.",
+      "example": "task.domain:example.com",
+      "note": "Can differ from the final host after redirects."
+    },
+    {
+      "operator": "domain:",
+      "description": "Host contacted anywhere during the visit.",
+      "example": "domain:example.com",
+      "note": "Includes resource requests and subdomains."
+    },
+    {
+      "operator": "page.ip:",
+      "description": "Address used by the primary page.",
+      "example": "page.ip:203.0.113.10",
+      "note": "Shared infrastructure does not prove ownership."
+    },
+    {
+      "operator": "ip:",
+      "description": "Address contacted by any recorded request.",
+      "example": "ip:203.0.113.10",
+      "note": "Network prefixes need an escaped slash, such as 203.0.113.0\\/24."
+    },
+    {
+      "operator": "page.asn: / asn:",
+      "description": "Primary hosting AS versus any contacted AS.",
+      "example": "page.asn:AS64496",
+      "note": "Use the AS prefix."
+    },
+    {
+      "operator": "page.country: / country:",
+      "description": "Primary IP country versus any contacted IP country.",
+      "example": "page.country:DK",
+      "note": "Use a two-letter country code."
+    },
+    {
+      "operator": "date:",
+      "description": "Time at which the scan was recorded.",
+      "example": "date:>now-30d",
+      "note": "Not a publication date, first-seen guarantee or live status."
+    },
+    {
+      "operator": "page.title:",
+      "description": "Phrase or terms in the page title.",
+      "example": "page.title:\"Example Organisation\"",
+      "note": "Use page.title.keyword for the whole title."
+    },
+    {
+      "operator": "page.redirected:",
+      "description": "Recorded navigation classification.",
+      "example": "page.redirected:\"off-domain\"",
+      "note": "Other values include same-domain, sub-domain, parent-domain, sibling-domain and https-only."
+    },
+    {
+      "operator": "page.status:",
+      "description": "HTTP status of the final response.",
+      "example": "page.status:(200 OR 404)",
+      "note": "A server can use HTTP 200 for an application error."
+    },
+    {
+      "operator": "page.server:",
+      "description": "Primary response server header.",
+      "example": "page.server:nginx",
+      "note": "The remote service controls its advertised header."
+    },
+    {
+      "operator": "page.mimeType:",
+      "description": "Reported content type of the final response.",
+      "example": "page.mimeType:\"text/html\"",
+      "note": "Describes the stored scan."
+    },
+    {
+      "operator": "filename:",
+      "description": "Text in any requested URL.",
+      "example": "filename:\"example.com\"",
+      "note": "A textual URL match is broader than a host match."
+    },
+    {
+      "operator": "hash: / files.sha256:",
+      "description": "HTTP response-body hash versus downloaded-file hash.",
+      "example": "hash:{hash}",
+      "note": "Supply an observed SHA256; shared assets can match unrelated sites."
+    },
+    {
+      "operator": "page.tlsAgeDays:",
+      "description": "Certificate age during the scan.",
+      "example": "page.tlsAgeDays:[0 TO 7]",
+      "note": "This value is not recalculated as time passes."
+    },
+    {
+      "operator": "page.tlsValidDays:",
+      "description": "Full certificate validity duration.",
+      "example": "page.tlsValidDays:[1 TO 30]",
+      "note": "Does not mean days until expiry."
+    },
+    {
+      "operator": "page.tlsValidFrom:",
+      "description": "Certificate validity start timestamp.",
+      "example": "page.tlsValidFrom:>now-30d",
+      "note": "Combine with a scan date window."
+    },
+    {
+      "operator": "stats.requests: / stats.uniqIPs:",
+      "description": "Request count and distinct contacted IP count.",
+      "example": "stats.requests:>100",
+      "note": "Counts are context, not verdicts."
+    },
+    {
+      "operator": "AND / OR / NOT",
+      "description": "Combine conditions and exclude matches.",
+      "example": "(page.status:200 OR page.status:404) AND NOT page.domain:example.com",
+      "note": "Use uppercase operators and parentheses."
+    },
+    {
+      "operator": "[from TO to]",
+      "description": "Inclusive numeric or date range.",
+      "example": "date:[2026-01-01 TO 2026-01-31]",
+      "note": "For a complete calendar month, an exclusive next-month boundary avoids ambiguity about the end timestamp."
+    },
+    {
+      "operator": "Wildcards & regex",
+      "description": "Pattern matching on supported fields.",
+      "example": "page.domain.keyword:*.example.com",
+      "note": "Leading wildcards and regular expressions require sign-in; regex is limited to supported RE fields."
+    },
+    {
+      "operator": "links.domains: / text.content:",
+      "description": "Outgoing links and rendered text.",
+      "example": "links.domains:example.com",
+      "note": "These are paid-plan fields: Professional, Enterprise or Ultimate. They are not used by the default templates."
+    }
+  ],
+  "patterns": [
+    {
+      "title": "Page or resource?",
+      "description": "Start with the broad contact field, then exclude your own primary sites.",
+      "query": "domain:example.com AND NOT page.domain:example.com AND date:>now-30d"
+    },
+    {
+      "title": "Submitted here, ended elsewhere",
+      "description": "Keep the original scope while excluding final pages in the same domain tree.",
+      "query": "task.domain:example.com AND NOT page.domain:example.com AND date:>now-30d"
+    },
+    {
+      "title": "Exact host, not its subdomains",
+      "description": "The keyword field keeps the hostname match exact.",
+      "query": "page.domain.keyword:\"example.com\" AND date:>now-30d"
+    },
+    {
+      "title": "Title phrase on other domains",
+      "description": "Look for title reuse and inspect each result before interpreting it.",
+      "query": "page.title:\"Example Organisation\" AND NOT page.domain:example.com AND date:>now-30d"
+    },
+    {
+      "title": "Secondary IP connections",
+      "description": "Separate dependency requests from primary hosting.",
+      "query": "ip:203.0.113.10 AND NOT page.ip:203.0.113.10 AND date:>now-30d"
+    },
+    {
+      "title": "Group response conditions",
+      "description": "Group alternatives before combining them with the domain scope.",
+      "query": "page.domain:example.com AND page.status:(403 OR 404 OR 500) AND date:>now-30d"
+    },
+    {
+      "title": "Review a precise time window",
+      "description": "An inclusive start and exclusive end define the complete month.",
+      "query": "page.domain:example.com AND date:>=2026-01-01 AND date:<2026-02-01"
+    },
+    {
+      "title": "Network prefix escaping",
+      "description": "Escape the CIDR slash in an unquoted IP filter.",
+      "query": "page.ip:203.0.113.0\\/24 AND date:>now-30d"
+    }
+  ],
+  "guide": [
+    {
+      "title": "Choose what the indicator means",
+      "text": "Use page.domain for a final website, task.domain for the submitted address, and domain for any contacted host. Apply the same primary-versus-any distinction to page.ip/ip and page.asn/asn."
+    },
+    {
+      "title": "Bound the observation window",
+      "text": "Start with a recent lookback and widen it when needed. The date filter describes scan time. A missing result does not prove a domain was inactive, and an old result does not describe its current state."
+    },
+    {
+      "title": "Build, then inspect the stored result",
+      "text": "Urlscanify opens a search of existing records. Review the result screenshot, navigation, request list and metadata on urlscan. It does not submit new scans or visit the investigated website for you."
+    },
+    {
+      "title": "Keep relationships separate from attribution",
+      "text": "A shared IP, title or content hash can have ordinary explanations: CDNs, hosting, templates and common libraries. Follow the specific request or redirect before deciding what a relationship means."
+    },
+    {
+      "title": "Know the account boundaries",
+      "text": "Search visibility, quotas and historical coverage depend on your urlscan account. Leading wildcards and regex require sign-in. Rendered text, outgoing links and verdict fields are restricted to the documented paid plans."
+    },
+    {
+      "title": "Preserve the evidence context",
+      "text": "Record the result link, scan timestamp and query used. Keep assessment notes and exports in your own controlled storage. Opening a query sends its terms to urlscan; this UI does not store service credentials."
+    }
+  ],
+  "references": [
+    {
+      "label": "urlscan search syntax",
+      "url": "https://docs.urlscan.io/pages/search-general"
+    },
+    {
+      "label": "Website scan fields and paid-plan boundaries",
+      "url": "https://docs.urlscan.io/pages/search-api-reference"
+    },
+    {
+      "label": "urlscan documentation",
+      "url": "https://docs.urlscan.io/"
+    },
+    {
+      "label": "urlscan Pro capabilities",
+      "url": "https://docs.urlscan.io/pages/urlscan-pro"
+    },
+    {
+      "label": "Search existing scans",
+      "url": "https://urlscan.io/search/"
+    }
+  ]
+}

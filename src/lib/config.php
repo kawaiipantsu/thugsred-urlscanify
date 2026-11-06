@@ -1,0 +1,127 @@
+<?php
+// THUGSred Urlscanify — branding and form fields.
+return [
+    'name' => 'Urlscanify',
+    'service' => 'urlscan',
+    'tagline' => 'Follow the requests. Find the connections.',
+    'description' => 'Search existing urlscan records by domains, requests and page details. Turn observations into useful pivots.',
+    'icon' => 61672,
+    'sample' => 'domain:example.com AND NOT page.domain:example.com',
+    'scope_note' => 'Primary page, submitted URL and contacted domains mean different things. Pick the relationship you want.',
+    'access_note' => 'Searches existing scan records only. Account quotas and field availability apply; scan results describe past observations.',
+    'docs' => 'https://docs.urlscan.io/pages/search-general',
+    'modes' => [
+        'search' => 'urlscan',
+    ],
+    'scope' => [
+        [
+            'key' => 'domain',
+            'label' => 'Domain',
+            'placeholder' => 'example.com',
+        ],
+        [
+            'key' => 'ip',
+            'label' => 'Primary IP address',
+            'placeholder' => '203.0.113.10',
+        ],
+        [
+            'key' => 'asn',
+            'label' => 'Primary ASN',
+            'placeholder' => 'AS64496',
+        ],
+        [
+            'key' => 'title',
+            'label' => 'Page title phrase',
+            'placeholder' => 'Example Organisation',
+        ],
+    ],
+    'fields' => [
+        [
+            'key' => 'domain_mode',
+            'label' => 'Match domain in',
+            'placeholder' => '',
+            'type' => 'select',
+            'options' => [
+                ['page', 'Primary page'],
+                ['task', 'Submitted URL'],
+                ['contact', 'Any contacted domain'],
+                ['thirdparty', 'Other pages contacting it'],
+            ],
+        ],
+        [
+            'key' => 'days',
+            'label' => 'Observed within (days)',
+            'placeholder' => '30',
+            'type' => 'number',
+            'min' => 1,
+            'max' => 3650,
+            'value' => '30',
+        ],
+        [
+            'key' => 'country',
+            'label' => 'Primary country code',
+            'placeholder' => 'DK',
+        ],
+        [
+            'key' => 'status',
+            'label' => 'Primary HTTP status',
+            'placeholder' => '',
+            'type' => 'select',
+            'options' => [
+                ['', 'Any'],
+                ['200', '200 — OK'],
+                ['301', '301 — redirect'],
+                ['302', '302 — redirect'],
+                ['401', '401 — login required'],
+                ['403', '403 — forbidden'],
+                ['404', '404 — not found'],
+                ['500', '500 — server error'],
+            ],
+        ],
+        [
+            'key' => 'redirect',
+            'label' => 'Redirect relationship',
+            'placeholder' => '',
+            'type' => 'select',
+            'options' => [
+                ['', 'Any'],
+                ['off-domain', 'Different domain'],
+                ['same-domain', 'Same domain'],
+                ['sub-domain', 'Subdomain'],
+                ['parent-domain', 'Parent domain'],
+                ['sibling-domain', 'Sibling domain'],
+                ['https-only', 'HTTPS upgrade'],
+            ],
+        ],
+        [
+            'key' => 'tls_issuer',
+            'label' => 'TLS issuer phrase',
+            'placeholder' => 'Example CA',
+        ],
+        [
+            'key' => 'server',
+            'label' => 'Primary server phrase',
+            'placeholder' => 'nginx',
+        ],
+        [
+            'key' => 'resource',
+            'label' => 'Requested URL / filename phrase',
+            'placeholder' => 'analytics.js',
+        ],
+        [
+            'key' => 'hash',
+            'label' => 'Response SHA-256',
+            'placeholder' => '64 hexadecimal characters',
+        ],
+        [
+            'key' => 'exclude_domain',
+            'label' => 'Exclude primary domain',
+            'placeholder' => 'example.net',
+        ],
+    ],
+    'slug' => 'urlscanify',
+    'version' => '1.0.0',
+    'repo' => 'https://github.com/kawaiipantsu/thugsred-urlscanify',
+    'homepage' => 'https://thugs.red',
+    'site' => 'https://urlscanify.thugs.red',
+];
